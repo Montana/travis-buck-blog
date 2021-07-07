@@ -98,7 +98,9 @@ So first, let's pick a `dist` we want to use, in this case I'll be using `focal`
 dist: focal # Let's select our dist
 language: generic # Selecting our language
 before_install: # Our before_install instructions 
+
 # Let's install Linuxbrew 
+
   - test -d $HOME/.linuxbrew/bin || git clone https://github.com/Linuxbrew/brew.git $HOME/.linuxbrew
   - 'PATH="$HOME/.linuxbrew/bin:$PATH"'
   - 'echo ''export PATH="$HOME/.linuxbrew/bin:$PATH"'' >>~/.bash_profile'
@@ -107,18 +109,43 @@ before_install: # Our before_install instructions
   - brew --version
   # Fetch Buck from Facebook 
   - brew tap facebook/fb
-  - brew install buck
+  - brew install buck # Brew fetches Buck here
   - buck --version
   - brew install gcc
 ```
-
 Now at this point, you've picked your `language`, `dist`, and now you've fetched `Linuxbrew`. Let's now use the `script` hook in Travis to utilize Buck:
 
 ```yaml
 script:
-  - 'buck build :hello'
+  - 'buck build :montana'
   directories:
     - $HOME/.linuxbrew/
  ```
- As you can see Travis is going to run `buck build` and we also are caching the `linuxbrew` directory. It is all about speed right? 
+ As you can see Travis is going to run `buck build` and we also are caching the `linuxbrew` directory. It is all about speed right? So in it's entirety, your `.travis.yml` file should look like this: 
+ 
+ ```yaml
+ dist: focal
+language: generic
+before_install:
+  - test -d $HOME/.linuxbrew/bin || git clone https://github.com/Linuxbrew/brew.git $HOME/.linuxbrew
+  - 'PATH="$HOME/.linuxbrew/bin:$PATH"'
+  - 'echo ''export PATH="$HOME/.linuxbrew/bin:$PATH"'' >>~/.bash_profile'
+  - 'export MANPATH="$(brew --prefix)/share/man:$MANPATH"'
+  - 'export INFOPATH="$(brew --prefix)/share/info:$INFOPATH"'
+  - brew --version
+  - brew tap facebook/fb
+  - brew install buck
+  - buck --version
+  - brew install gcc
+  - echo buck testing! 
+script:
+  - 'buck build :montana'
+  directories:
+    - $HOME/.linuxbrew/
+  ```
 
+After all said and done and you trigger the build, you should see similar results to this: 
+
+<img width="805" alt="Screen Shot 2021-07-07 at 2 14 52 PM" src="https://user-images.githubusercontent.com/20936398/124829810-f57c0480-df2d-11eb-8b87-69ceb5773169.png">
+
+As you can see my build with Buck was successful with Travis, and there you have it! If you have any questions please feel free to contact me at [montana@travis-ci.com](mailto:montana@travis-ci.com), and happy building! 
