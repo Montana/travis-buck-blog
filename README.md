@@ -30,23 +30,10 @@ A few things you'll want to have, first thing is a file entitled `BUCK`, I wrote
 cxx_binary(
   name = 'montana',
   srcs = [
-    'montana.cpp',
+    'main.cpp',
   ],
-  headers = [
-    'montana.h',
-  ],
-  deps = [
-    ':monty',
-  ],
-)
-
-cxx_library(
-  name = 'monty',
-  srcs = [
-    'monty.cpp',
-  ],
-  headers = [
-    'monty.h',
+  compiler_flags = [
+    '-v',
   ],
 )
 ```
