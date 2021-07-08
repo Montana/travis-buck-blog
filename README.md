@@ -130,6 +130,7 @@ script:
  ```yaml
  dist: focal
 language: generic
+services: docker
 before_install:
   - test -d $HOME/.linuxbrew/bin || git clone https://github.com/Linuxbrew/brew.git $HOME/.linuxbrew
   - 'PATH="$HOME/.linuxbrew/bin:$PATH"'
