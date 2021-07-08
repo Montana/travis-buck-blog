@@ -82,62 +82,89 @@ Alright we now have our `BUCK` file, and our C++ program! Let's start setting up
 So first, let's pick a `dist` we want to use, in this case I'll be using `focal`, I'll be setting my `language` to generic, and you'll see something rather specific, which is we will not be using `Homebrew` in this `.travis.yml` file, but `Linuxbrew`, let's get started: 
 
 ```yaml
+language: cpp
+sudo: true
+dist: trusty
 
-dist: focal
-language: generic
-
-services: docker 
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - g++-6
+      - gcc-6
 
 before_install:
-  # Install Linuxbrew
-  - test -d $HOME/.linuxbrew/bin || git clone https://github.com/Linuxbrew/brew.git $HOME/.linuxbrew
-  - PATH="$HOME/.linuxbrew/bin:$PATH"
-  - echo 'export PATH="$HOME/.linuxbrew/bin:$PATH"' >>~/.bash_profile
-  - export MANPATH="$(brew --prefix)/share/man:$MANPATH"
-  - export INFOPATH="$(brew --prefix)/share/info:$INFOPATH"
+- sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-6 90
+- sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-6 90
+- sudo apt-get install -y equivs openjdk-8-jdk
+- wget -O buck.deb https://github.com/facebook/buck/releases/download/v2018.08.27.01/buck.2018.08.27.01_all.deb
+- sudo dpkg -i buck.deb
+- buck --version
+- wget -O buckaroo.deb https://github.com/LoopPerfect/buckaroo/releases/download/v1.4.1/buckaroo.deb
+- sudo dpkg -i buckaroo.deb
+- buckaroo version
+- c++ --version
+- g++ --version
+- gcc --version
 
-  # Install Buck
-  - brew tap facebook/fb
-  - brew install buck
-  - buck --version
-  # Install GCC
-  - brew install gcc
-  
+script:
+- buckaroo install
+- buck build :montana
+- buck test :montana
 ```
+
 Now at this point, you've picked your `language`, `dist`, and now you've fetched `Linuxbrew`. Let's now use the `script` hook in Travis to utilize Buck:
 
 ```yaml
 script:
-  - 'buck build :montana'
-  directories:
-    - $HOME/.linuxbrew/
- ```
+- buckaroo install
+- buck build :montana
+- buck test :montana
+  ```
  As you can see Travis is going to run `buck build` and we also are caching the `linuxbrew` directory. It is all about speed right? So in it's entirety, your `.travis.yml` file should look like this: 
  
- ```yaml
- dist: focal
-language: generic
-services: docker
+```yaml
+language: cpp
+sudo: true
+dist: trusty
+
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - g++-6
+      - gcc-6
+
 before_install:
-  - test -d $HOME/.linuxbrew/bin || git clone https://github.com/Linuxbrew/brew.git $HOME/.linuxbrew
-  - 'PATH="$HOME/.linuxbrew/bin:$PATH"'
-  - 'echo ''export PATH="$HOME/.linuxbrew/bin:$PATH"'' >>~/.bash_profile'
-  - 'export MANPATH="$(brew --prefix)/share/man:$MANPATH"'
-  - 'export INFOPATH="$(brew --prefix)/share/info:$INFOPATH"'
-  - brew --version
-  - brew tap facebook/fb
-  - brew install buck
-  - buck --version
-  - brew install gcc
-  - echo buck testing! 
-script:
-  - 'buck build :montana'
-  directories:
-    - $HOME/.linuxbrew/
-  ```
+- sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-6 90
+- sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-6 90
+- sudo apt-get install -y equivs openjdk-8-jdk
+- wget -O buck.deb https://github.com/facebook/buck/releases/download/v2018.08.27.01/buck.2018.08.27.01_all.deb
+- sudo dpkg -i buck.deb
+- buck --version
+- wget -O buckaroo.deb https://github.com/LoopPerfect/buckaroo/releases/download/v1.4.1/buckaroo.deb
+- sudo dpkg -i buckaroo.deb
+- buckaroo version
+- c++ --version
+- g++ --version
+- gcc --version
+```
 
 After all said and done and you trigger the build, you should see similar results to this: 
 
 <img width="805" alt="Screen Shot 2021-07-07 at 2 14 52 PM" src="https://user-images.githubusercontent.com/20936398/124829810-f57c0480-df2d-11eb-8b87-69ceb5773169.png">
+
+You'll also not want to forget to create a file called `Buckaroo.json`, this file should look a bit something like this: 
+
+```json
+
+{
+  "name": "montana",
+  "dependencies": {
+  }
+}
+```
 
 As you can see my build with Buck was successful with Travis, and there you have it! If you have any questions please feel free to contact me at [montana@travis-ci.com](mailto:montana@travis-ci.com), and happy building! 
