@@ -79,7 +79,7 @@ Alright we now have our `BUCK` file, and our C++ program! Let's start setting up
 
 ## The setup 
 
-So first, let's pick a `dist` we want to use, in this case I'll be using `focal`, I'll be setting my `language` to generic, and you'll see something rather specific, which is we will not be using `Homebrew` in this `.travis.yml` file, but `Linuxbrew`, let's get started: 
+So first, let's pick a `dist` we want to use, in this case I'll be using `trusty`, I'll be setting my `language` to generic, and you'll see something rather specific, which is we will not be using `Homebrew` in this `.travis.yml` file, but `Linuxbrew`, let's get started: 
 
 ```yaml
 language: cpp
