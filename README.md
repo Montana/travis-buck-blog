@@ -95,23 +95,27 @@ Alright we now have our `BUCK` file, and our C++ program! Let's start setting up
 So first, let's pick a `dist` we want to use, in this case I'll be using `focal`, I'll be setting my `language` to generic, and you'll see something rather specific, which is we will not be using `Homebrew` in this `.travis.yml` file, but `Linuxbrew`, let's get started: 
 
 ```yaml
-dist: focal # Let's select our dist
-language: generic # Selecting our language
-before_install: # Our before_install instructions 
 
-# Let's install Linuxbrew 
+dist: focal
+language: generic
 
+services: docker 
+
+before_install:
+  # Install Linuxbrew
   - test -d $HOME/.linuxbrew/bin || git clone https://github.com/Linuxbrew/brew.git $HOME/.linuxbrew
-  - 'PATH="$HOME/.linuxbrew/bin:$PATH"'
-  - 'echo ''export PATH="$HOME/.linuxbrew/bin:$PATH"'' >>~/.bash_profile'
-  - 'export MANPATH="$(brew --prefix)/share/man:$MANPATH"'
-  - 'export INFOPATH="$(brew --prefix)/share/info:$INFOPATH"'
-  - brew --version
-  # Fetch Buck from Facebook 
+  - PATH="$HOME/.linuxbrew/bin:$PATH"
+  - echo 'export PATH="$HOME/.linuxbrew/bin:$PATH"' >>~/.bash_profile
+  - export MANPATH="$(brew --prefix)/share/man:$MANPATH"
+  - export INFOPATH="$(brew --prefix)/share/info:$INFOPATH"
+
+  # Install Buck
   - brew tap facebook/fb
-  - brew install buck # Brew fetches Buck here
+  - brew install buck
   - buck --version
+  # Install GCC
   - brew install gcc
+  
 ```
 Now at this point, you've picked your `language`, `dist`, and now you've fetched `Linuxbrew`. Let's now use the `script` hook in Travis to utilize Buck:
 
