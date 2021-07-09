@@ -215,4 +215,4 @@ As you can see my build with Buck was successful with Travis, and there you have
 
 ## Resources 
 
-Here is the source code via my GitHub so you can follow along! [Travis CI + Buck GitHub Source Code via Montana Mendy.](https://github.com/Montana/travis-buckblog-resource).
+Here is the source code via my GitHub so you can follow along! [Travis CI + Buck GitHub Source Code via Montana Mendy.](https://github.com/Montana/travis-buckblog-resource)
