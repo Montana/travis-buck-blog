@@ -1,5 +1,5 @@
 ---
-title: "Travis CI + Buck"
+title: "Building With Buck + Travis CI"
 created_at: Fri Jul 09 2021 15:00:00 EDT
 author: Montana Mendy
 layout: post
@@ -79,7 +79,7 @@ Alright we now have our `BUCK` file, and our C++ program! Let's start setting up
 
 ## The setup 
 
-So first, let's pick a `dist` we want to use, in this case I'll be using `trusty`, I'll be setting my `language` to generic, and you'll see something rather specific, which is we will not be using `Homebrew` in this `.travis.yml` file, but `Linuxbrew`, let's get started: 
+So first, let's pick a `dist` we want to use, in this case I'll be using `trusty`, I'll be setting my `language` to `cpp` this of course is C++, and you'll see something rather specific, which is we will not be using `Homebrew` in this `.travis.yml` file, but `Linuxbrew`, let's get started: 
 
 ```yaml
 language: cpp
@@ -169,6 +169,8 @@ You'll also not want to forget to create a file called `Buckaroo.json`, this fil
   }
 }
 ```
+<img width="292" alt="buckaroo" src="https://user-images.githubusercontent.com/20936398/125123932-2f731500-e0ac-11eb-91fb-f3ab7136d2fb.png">
+
 
 You also need a `.buckconfig` file, you'll notice we instructed Travis to grab Buckaroo via these lines:
 
@@ -177,7 +179,7 @@ You also need a `.buckconfig` file, you'll notice we instructed Travis to grab B
 - sudo dpkg -i buckaroo.deb
 - buckaroo version
 ```
-This is use `wget` to fetch `Buckaroo`, and then printing the version out for a more verbose look at your Travis CI log. Let's move onto the `.buckconfig` file. 
+We are going to use the `wget` CLI tool to fetch `Buckaroo`, and then printing the version out for a more verbose look at your Travis CI log. Let's move onto the `.buckconfig` file. 
 
 ## Buck config 
 
@@ -210,3 +212,7 @@ brew 'xctool'
 ```
 
 As you can see my build with Buck was successful with Travis, and there you have it! If you have any questions please feel free to contact me at [montana@travis-ci.com](mailto:montana@travis-ci.com), and happy building! 
+
+## Resources 
+
+Here is the source code via my GitHub so you can follow along! [Travis CI + Buck GitHub Source Code via Montana Mendy.](https://github.com/Montana/travis-buckblog-resource).
