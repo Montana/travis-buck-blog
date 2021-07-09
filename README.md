@@ -83,7 +83,7 @@ So first, let's pick a `dist` we want to use, in this case I'll be using `trusty
 
 ```yaml
 language: cpp
-sudo: true
+sudo: true # Not compulsory, I just do this out of habit still. - Montana 
 dist: trusty
 
 addons:
