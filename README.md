@@ -179,7 +179,7 @@ You also need a `.buckconfig` file, you'll notice we instructed Travis to grab B
 ```
 This is use `wget` to fetch `Buckaroo`, and then printing the version out for a more verbose look at your Travis CI log. Let's move onto the `.buckconfig` file. 
 
-# Buck config 
+## Buck config 
 
 Let's create a file called `.buckconfig`, this is an exact copy of what mine looks like currently, feel free to use it:
 
