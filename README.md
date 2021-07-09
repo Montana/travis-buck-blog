@@ -156,6 +156,9 @@ After all said and done and you trigger the build, you should see similar result
 
 <img width="805" alt="Screen Shot 2021-07-07 at 2 14 52 PM" src="https://user-images.githubusercontent.com/20936398/124829810-f57c0480-df2d-11eb-8b87-69ceb5773169.png">
 
+
+## Buckaroo 
+
 You'll also not want to forget to create a file called `Buckaroo.json`, this file should look a bit something like this: 
 
 ```json
@@ -165,6 +168,45 @@ You'll also not want to forget to create a file called `Buckaroo.json`, this fil
   "dependencies": {
   }
 }
+```
+
+You also need a `.buckconfig` file, you'll notice we instructed Travis to grab Buckaroo via these lines:
+
+```yaml
+- wget -O buckaroo.deb https://github.com/LoopPerfect/buckaroo/releases/download/v1.4.1/buckaroo.deb
+- sudo dpkg -i buckaroo.deb
+- buckaroo version
+```
+This is use `wget` to fetch `Buckaroo`, and then printing the version out for a more verbose look at your Travis CI log. Let's move onto the `.buckconfig` file. 
+
+# Buck config 
+
+Let's create a file called `.buckconfig`, this is an exact copy of what mine looks like currently, feel free to use it:
+
+```starlark
+
+[project]
+  ignore = .git, .buckd
+
+[parser]
+  default_build_file_syntax = SKYLARK
+
+[cxx]
+  should_remap_host_platform = true
+
+[cxx#linux-x86_64]
+  cxxflags = -std=c++14
+
+[cxx#macosx-x86_64]
+  cxxflags = -std=c++14
+```
+
+When it comes to package managers you fetch from, you'll want to use `cURL`, on that note you have a choice obviously of using `Linuxbrew` or `Homebrew`. In my example I used `Linuxbrew`, this is just a choice, you can use `Homebrew` if you wish, you need to make sure you have something called a `Brewfile`, create a file called `Brewfile`, and add the following: 
+
+```bash
+tap 'facebook/fb'
+brew 'buck'
+brew 'xctool'
 ```
 
 As you can see my build with Buck was successful with Travis, and there you have it! If you have any questions please feel free to contact me at [montana@travis-ci.com](mailto:montana@travis-ci.com), and happy building! 
