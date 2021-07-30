@@ -13,206 +13,133 @@ tags:
   - community
 ---
 
+![Sphinx](https://user-images.githubusercontent.com/20936398/127698282-d19efe0f-5246-4dd3-8c1f-9626b0ba3c0d.png)
 
-![TCI-Graphics for AdsBlogs](https://user-images.githubusercontent.com/20936398/124826241-7684cd00-df29-11eb-8fcb-21db161a5087.png)
 
-
-So you have a Buck based project and want to use Travis as your CI, first that's a great choice, secondly Buck is quick. Buck is a build system developed and used by Facebook. It encourages the creation of small, reusable modules consisting of code and resources, and supports a variety of languages on many platforms. In this weeks tutorial I'll be showing you how to integrate Buck into your Travis CI builds.
+Sphinx is a documentation generator or a tool that translates a set of plain text source files into various output formats, automatically producing cross-references, indices, etc. That is, if you have a directory containing a bunch of reStructuredText or Markdown documents, Sphinx can generate a series of HTML files, a PDF file (via LaTeX), man pages and much more. Let's integrate Travis CI for automatic document generation and make things a bit easier!
 
 <!-- more --> 
 
-## Buck up and let's get building
+## Quickstart
 
+Let's install Sphinx using the CLI: 
 
-A few things you'll want to have, first thing is a file entitled `BUCK`, I wrote up a little example of how this file should look like:
-
-```cpp
-cxx_binary(
-  name = 'montana',
-  srcs = [
-    'main.cpp',
-  ],
-  compiler_flags = [
-    '-v',
-  ],
-)
+```bash
+pip install --user travis-sphinx
+export PATH=$HOME/.local/bin:$PATH
 ```
+Make sure you have a `gh-pages` branch: 
 
-Now let's edit our file entitled `montana.cpp`, this is a quick C++ program I've made that will reverse sentences using recursion: 
-
-```cpp
-#include <iostream>
-using namespace std;
-
-void rev_str(char* string)
-
-{
-  if (*string == '\0')
-
-    return;
-
-  else
-
-  {
-    rev_str(string + 1);
-
-    cout << *string;
-  }
-}
-
-int main()
-
-{
-  char string[] = "Building with Travis CI";
-
-  cout << "Original String: " << string << endl;
-
-  cout << "Reversed String: ";
-
-  rev_str(string);
-
-  return 0;
-}
+```bash
+git checkout -b gh-pages
+git rm -rf .
+git push --set-upstream origin gh-pages
 ```
+You'll then need to get an `access_token` from GitHub - so you'll need to generate a token to use. Head over to your GitHub account settings:
 
-Alright we now have our `BUCK` file, and our C++ program! Let's start setting up Travis for Buck. 
+<img width="953" alt="Screen Shot 2021-07-30 at 11 45 46 AM" src="https://user-images.githubusercontent.com/20936398/127698217-a72e7e12-3397-4135-9307-41cd8dd3cad3.png">
+
 
 ## The setup 
 
-So first, let's pick a `dist` we want to use, in this case I'll be using `trusty`, I'll be setting my `language` to `cpp` this of course is C++, and you'll see something rather specific, which is we will not be using `Homebrew` in this `.travis.yml` file, but `Linuxbrew`, let's get started: 
+Given the things in this guide we have, the `.travis.yml` file will look a bit like this:
 
 ```yaml
-language: cpp
-sudo: true # Not compulsory, I just do this out of habit still. - Montana 
-dist: trusty
-
-addons:
-  apt:
-    sources:
-      - ubuntu-toolchain-r-test
-    packages:
-      - g++-6
-      - gcc-6
-
-before_install:
-- sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-6 90
-- sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-6 90
-- sudo apt-get install -y equivs openjdk-8-jdk
-- wget -O buck.deb https://github.com/facebook/buck/releases/download/v2018.08.27.01/buck.2018.08.27.01_all.deb
-- sudo dpkg -i buck.deb
-- buck --version
-- wget -O buckaroo.deb https://github.com/LoopPerfect/buckaroo/releases/download/v1.4.1/buckaroo.deb
-- sudo dpkg -i buckaroo.deb
-- buckaroo version
-- c++ --version
-- g++ --version
-- gcc --version
-
+language: python
+python:
+- '3.7'
+- '3.8'
+- 3.8-dev
+- nightly
+install:
+- pip install -r dev-requirements.txt
 script:
-- buckaroo install
-- buck build :montana
-- buck test :montana
-```
-
-Now at this point, you've picked your `language`, `dist`, and now you've fetched `Linuxbrew`. Let's now use the `script` hook in Travis to utilize Buck:
-
-```yaml
-script:
-- buckaroo install
-- buck build :montana
-- buck test :montana
-  ```
- As you can see Travis is going to run `buck build` and we also are caching the `linuxbrew` directory. It is all about speed right? So in it's entirety, your `.travis.yml` file should look like this: 
+- make -C docs/ html
+- touch docs/build/html/.nojekyll
+deploy:
+  - provider: pypi
+    user: "__token__"
+    password: $PYPI_TOKEN
+    skip_existing: true
+  - provider: pages:git
+    verbose: true
+    token: $GITHUB_TOKEN
+    edge: true
+    local_dir: ./docs/build/html/
+    keep_history: true
+ ```
  
-```yaml
-language: cpp
-sudo: true
-dist: trusty
+ Now let's set your `env vars` in the Travis CI GUI: 
+ 
+ ![1_hNIPvvrBAdPakiYx6wOthw](https://user-images.githubusercontent.com/20936398/127698526-06d3c779-a181-430f-8cf6-247a71ea5d61.png)
+ 
+ ## Building
+ 
+ Here's a sample `build.py` for Sphinx, that you may want to use to speed the process up:
+ 
+ ```python
+import logging
 
-addons:
-  apt:
-    sources:
-      - ubuntu-toolchain-r-test
-    packages:
-      - g++-6
-      - gcc-6
+import click
+try:
+    # Sphinx 1.7+
+    from sphinx.cmd.build import build_main
+    sphinx_version_at_least_1_7 = True
+except AttributeError:
+    from sphinx import build_main
+    sphinx_version_at_least_1_7 = False
 
-before_install:
-- sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-6 90
-- sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-6 90
-- sudo apt-get install -y equivs openjdk-8-jdk
-- wget -O buck.deb https://github.com/facebook/buck/releases/download/v2018.08.27.01/buck.2018.08.27.01_all.deb
-- sudo dpkg -i buck.deb
-- buck --version
-- wget -O buckaroo.deb https://github.com/LoopPerfect/buckaroo/releases/download/v1.4.1/buckaroo.deb
-- sudo dpkg -i buckaroo.deb
-- buckaroo version
-- c++ --version
-- g++ --version
-- gcc --version
+from .main import main
+
+_logger = logging.getLogger(__name__)
+
+
+@click.command(
+    help="Build sphinx documentation."
+)
+@click.option(
+    '-s', '--source',
+    type=click.Path(dir_okay=True, file_okay=False, exists=True),
+    help='Source directory of sphinx docs',
+    default='docs/source',
+    show_default=True
+)
+@click.option(
+    '-n', '--nowarn',
+    type=click.BOOL,
+    is_flag=True,
+    help='Do not error on warnings',
+)
+@click.pass_context
+def build(ctx, source, nowarn):
+    """
+    Build documentation from ``source``, placing built files in
+    ``target``.
+    """
+    _logger.info('building documentation')
+    outdir = ctx.obj['outdir']
+
+    if sphinx_version_at_least_1_7:
+    
+        args = ['-b', 'html']
+    else:
+        args = ['-b html']
+
+    if not nowarn:
+        args.append('-W')
+    if build_main(args + [source, outdir]):
+        raise click.ClickException("Error building sphinx doc")
 ```
+## Specifying a custom deployment repository
 
-After all said and done and you trigger the build, you should see similar results to this: 
-
-<img width="805" alt="Screen Shot 2021-07-07 at 2 14 52 PM" src="https://user-images.githubusercontent.com/20936398/124829810-f57c0480-df2d-11eb-8b87-69ceb5773169.png">
-
-
-## Buckaroo 
-
-You'll also not want to forget to create a file called `Buckaroo.json`, this file should look a bit something like this: 
-
-```json
-
-{
-  "name": "montana",
-  "dependencies": {
-  }
-}
-```
-<img width="292" alt="buckaroo" src="https://user-images.githubusercontent.com/20936398/125123932-2f731500-e0ac-11eb-91fb-f3ab7136d2fb.png">
-
-
-You also need a `.buckconfig` file, you'll notice we instructed Travis to grab Buckaroo via these lines:
-
-```yaml
-- wget -O buckaroo.deb https://github.com/LoopPerfect/buckaroo/releases/download/v1.4.1/buckaroo.deb
-- sudo dpkg -i buckaroo.deb
-- buckaroo version
-```
-We are going to use the `wget` CLI tool to fetch `Buckaroo`, and then printing the version out for a more verbose look at your Travis CI log. Let's move onto the `.buckconfig` file. 
-
-## Buck config 
-
-Let's create a file called `.buckconfig`, this is an exact copy of what mine looks like currently, feel free to use it:
-
-```starlark
-
-[project]
-  ignore = .git, .buckd
-
-[parser]
-  default_build_file_syntax = SKYLARK
-
-[cxx]
-  should_remap_host_platform = true
-
-[cxx#linux-x86_64]
-  cxxflags = -std=c++14
-
-[cxx#macosx-x86_64]
-  cxxflags = -std=c++14
-```
-
-When it comes to package managers you fetch from, you'll want to use `cURL`, on that note you have a choice obviously of using `Linuxbrew` or `Homebrew`. In my example I used `Linuxbrew`, this is just a choice, you can use `Homebrew` if you wish, you need to make sure you have something called a `Brewfile`, create a file called `Brewfile`, and add the following: 
+Now, to specify a custom deployment repository if you're using a fork (which most people reading this might be), for working on documentation. To do so, under your Travis environment variables, use the following `constant`:
 
 ```bash
-tap 'facebook/fb'
-brew 'buck'
-brew 'xctool'
+GH_REPO_SLUG = 'syntaf/fork-of-my-repo'
 ```
 
-As you can see my build with Buck was successful with Travis, and there you have it! If you have any questions please feel free to contact me at [montana@travis-ci.com](mailto:montana@travis-ci.com), and happy building! 
+## Congratulations
 
-## Resources 
+You've done it, here's a working [example:](https://nasa-develop.github.io/dnppy/) that NASA is using, [https://develop.larc.nasa.gov/](https://develop.larc.nasa.gov/).
 
-Here is the source code via my GitHub so you can follow along! [Travis CI + Buck GitHub Source Code via Montana Mendy.](https://github.com/Montana/travis-buckblog-resource)
+If you need any more resources or help, please email me personally at [montana@travis-ci.com](mailto:montana@travis-ci.com), or look at the official Sphinx [documentation](https://www.sphinx-doc.org/en/master/usage/quickstart.html) to get a better idea of the `.travis.yml` I have laid out above. 
