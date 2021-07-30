@@ -138,8 +138,12 @@ Now, to specify a custom deployment repository if you're using a fork (which mos
 GH_REPO_SLUG = 'syntaf/fork-of-my-repo'
 ```
 
+Here's an example from Vim on how the config (the `.travis.yml`) looks currently from my machine:
+
+<img width="534" alt="Screen Shot 2021-07-30 at 12 00 13 PM" src="https://user-images.githubusercontent.com/20936398/127699835-552132c4-1b40-4b05-8360-cdd61be2ff43.png">
+
 ## Congratulations
 
 You've done it, here's a working [example:](https://nasa-develop.github.io/dnppy/) that NASA is using, [https://develop.larc.nasa.gov/](https://develop.larc.nasa.gov/).
 
-If you need any more resources or help, please email me personally at [montana@travis-ci.com](mailto:montana@travis-ci.com), or look at the official Sphinx [documentation](https://www.sphinx-doc.org/en/master/usage/quickstart.html) to get a better idea of the `.travis.yml` I have laid out above. 
+If you need any more resources or help, please email me personally at [montana@travis-ci.com](mailto:montana@travis-ci.com), or look at the official Sphinx [documentation](https://www.sphinx-doc.org/en/master/usage/quickstart.html) to get a better idea of the `.travis.yml` I have laid out above. Happy building! 
