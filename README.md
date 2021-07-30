@@ -1,5 +1,5 @@
 ---
-title: "Building With Buck + Travis CI"
+title: "Using Sphinx & Travis CI Together for Seamless Documentation"
 created_at: Fri Jul 09 2021 15:00:00 EDT
 author: Montana Mendy
 layout: post
